@@ -129,7 +129,6 @@ app.use(cors());
 
 mongoose.connect("mongodb://127.0.0.1:27017/employee");
 
-// Login information section
 app.get('/register', async (req, res) => {
   try {
     const loginInfo = await userInformation.find();
@@ -145,27 +144,39 @@ app.post('/register', (req, res) => {
     .catch(err => res.json(err));
 });
 
+
+
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   userInformation.findOne({ email: email })
     .then(user => {
       if (user) {
         if (user.password === password) {
-          res.json("success");
+          res.json({ success: true, userId: user._id });  // Include user ID in the response
         } else {
-          res.json("incorrect password");
+          res.json({ success: false, message: "Incorrect password" });
         }
       } else {
-        res.json("record Not found");
+        res.json({ success: false, message: "Record not found" });
       }
-    });
+    })
+    .catch(err => res.status(500).json({ success: false, message: err.message }));
 });
+
 
 // Income data
 app.get('/add-income', async (req, res) => {
   try {
-    const incomeInfo = await incomeSchema.find();
-    res.json(incomeInfo);
+    console.log(req.query)
+    if(req.query.userId){
+      const incomeInfo = await incomeSchema.find({userId:req.query.userId});
+      res.json(incomeInfo);
+    }
+    else{
+      const incomeInfo = await incomeSchema.find();
+      res.json(incomeInfo);
+    }
+   
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -194,8 +205,14 @@ app.delete('/income/:id', async (req, res) => {
 // Expense data
 app.get('/add-expense', async (req, res) => {
   try {
-    const expenseInfo = await expenseSchema.find();
-    res.json(expenseInfo);
+    if(req.query.userId){
+      const expenseInfo = await expenseSchema.find({userId:req.query.userId});
+      res.json(expenseInfo);
+    }
+    else{
+      const expenseInfo = await expenseSchema.find();
+      res.json(expenseInfo);
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

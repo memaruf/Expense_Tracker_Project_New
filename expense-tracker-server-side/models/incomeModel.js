@@ -1,10 +1,11 @@
 const mongoose=require('mongoose')
 const incomeSchema = new mongoose.Schema({
 
-   //  sources:String,
-   //  title:String,
-   //  amount:Number,
-   //  date: Date
+   userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'UserInformation',
+      required: true,
+    },
    
    sources:{
       type:String,
